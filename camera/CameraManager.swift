@@ -495,7 +495,8 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      */
     open func startRecordingVideo() {
         if cameraOutputMode != .stillImage {
-            
+            self.deviceOrientation = UIDevice.current.orientation
+
             _getMovieOutput().connection(with: AVMediaType.video)?.videoOrientation = returnedOrientation();
             
             _getMovieOutput().startRecording(to: _tempFilePath(), recordingDelegate: self)
@@ -953,7 +954,6 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 
     
     fileprivate func _startFollowingDeviceOrientation() {
-        self.deviceOrientation = UIDevice.current.orientation
 
         if shouldRespondToOrientationChanges && !cameraIsObservingDeviceOrientation {
             coreMotionManager = CMMotionManager()
@@ -970,6 +970,7 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
 //                            ?   data.acceleration.x > 0 ? (self.deviceOrientation = UIDeviceOrientation.landscapeRight)  :  (self.deviceOrientation = UIDeviceOrientation.landscapeLeft)
 //                            :   data.acceleration.y > 0 ? (self.deviceOrientation = UIDeviceOrientation.portraitUpsideDown)   :   (self.deviceOrientation = UIDeviceOrientation.portrait)
                         
+                        self.deviceOrientation = UIDevice.current.orientation
 
                         self._orientationChanged()
                 })
