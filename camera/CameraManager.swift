@@ -495,6 +495,9 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
      */
     open func startRecordingVideo() {
         if cameraOutputMode != .stillImage {
+            
+            _getMovieOutput().connection(with: AVMediaType.video)?.videoOrientation = returnedOrientation();
+            
             _getMovieOutput().startRecording(to: _tempFilePath(), recordingDelegate: self)
         } else {
             _show(NSLocalizedString("Capture session output still image", comment:""), message: NSLocalizedString("I can only take pictures", comment:""))
@@ -929,7 +932,29 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
         })
     }
     
+    func returnedOrientation() -> AVCaptureVideoOrientation {
+        var videoOrientation: AVCaptureVideoOrientation!
+        let orientation = UIDevice.current.orientation
+
+        switch orientation {
+        case .portrait:
+            videoOrientation = .portrait
+        case .portraitUpsideDown:
+            videoOrientation = .portraitUpsideDown
+        case .landscapeLeft:
+            videoOrientation = .landscapeRight
+        case .landscapeRight:
+            videoOrientation = .landscapeLeft
+        case .faceDown, .faceUp, .unknown:
+            videoOrientation = .portrait
+        }
+        return videoOrientation
+    }
+
+    
     fileprivate func _startFollowingDeviceOrientation() {
+        self.deviceOrientation = UIDevice.current.orientation
+
         if shouldRespondToOrientationChanges && !cameraIsObservingDeviceOrientation {
             coreMotionManager = CMMotionManager()
             coreMotionManager.accelerometerUpdateInterval = 0.1
@@ -938,12 +963,14 @@ open class CameraManager: NSObject, AVCaptureFileOutputRecordingDelegate, UIGest
                 coreMotionManager.startAccelerometerUpdates(to: OperationQueue(), withHandler:
                     {data, error in
                         
-                        guard let data = data else{
-                            return
-                        }
-                        abs( data.acceleration.y ) < abs( data.acceleration.x )
-                            ?   data.acceleration.x > 0 ? (self.deviceOrientation = UIDeviceOrientation.landscapeRight)  :  (self.deviceOrientation = UIDeviceOrientation.landscapeLeft)
-                            :   data.acceleration.y > 0 ? (self.deviceOrientation = UIDeviceOrientation.portraitUpsideDown)   :   (self.deviceOrientation = UIDeviceOrientation.portrait)
+//                        guard let data = data else{
+//                            return
+//                        }
+//                        abs( data.acceleration.y ) < abs( data.acceleration.x )
+//                            ?   data.acceleration.x > 0 ? (self.deviceOrientation = UIDeviceOrientation.landscapeRight)  :  (self.deviceOrientation = UIDeviceOrientation.landscapeLeft)
+//                            :   data.acceleration.y > 0 ? (self.deviceOrientation = UIDeviceOrientation.portraitUpsideDown)   :   (self.deviceOrientation = UIDeviceOrientation.portrait)
+                        
+
                         self._orientationChanged()
                 })
                 
